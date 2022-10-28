@@ -1,0 +1,37 @@
+version: "3"
+services:
+  schedule:
+    build:
+      context: .
+    image: "fikridulumina/schedule-services:dev-1.0.0"
+    container_name: app_schedule
+    volumes:
+      - "./.env/:/opt/app/.env"
+      - "./index.js/:/opt/app/index.js"
+      - "./app/:/opt/app/app"
+    depends_on:
+      - dbSchedule
+    networks:
+      - kong-net
+    restart: always
+    command: sh -c "${RUNNER} index.js"
+
+  dbSchedule:
+    image: "mysql:5.7"
+    container_name: db_schedule
+    restart: always
+    environment:
+      MYSQL_DATABASE: "${DB_NAME}"
+      MYSQL_USER: "${DB_USER}"
+      MYSQL_PASSWORD: "${DB_PASS}"
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASS}"
+    ports:
+      - "${DB_PORT}"
+    volumes:
+      - "./my-db:/var/lib/mysql"
+    networks:
+      - kong-net
+
+networks:
+  kong-net:
+    external: true
